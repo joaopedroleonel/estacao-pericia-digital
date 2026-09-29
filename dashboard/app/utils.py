@@ -34,7 +34,7 @@ def parse_degree_pair(text: object) -> tuple[float, float] | None:
 def dms_to_decimal(values: Iterable | None, reference: object) -> float | None:
     try:
         degrees, minutes, seconds = (float(value) for value in values)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, ZeroDivisionError):
         return None
     decimal = degrees + minutes / 60 + seconds / 3600
     if math.isnan(decimal):

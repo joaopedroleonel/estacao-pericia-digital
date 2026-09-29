@@ -1,4 +1,5 @@
 import pytest
+from PIL.TiffImagePlugin import IFDRational
 
 from app.utils import dms_to_decimal, is_safe_filename, parse_degree_pair
 
@@ -30,3 +31,8 @@ def test_converts_dms_to_decimal(reference, expected):
 @pytest.mark.parametrize("values", [None, (1, 2), ("a", 2, 3)])
 def test_rejects_incomplete_dms(values):
     assert dms_to_decimal(values, "N") is None
+
+
+def test_treats_gps_zeroed_by_iphone_as_missing():
+    zeroed = (IFDRational(0, 0), IFDRational(0, 0), IFDRational(0, 0))
+    assert dms_to_decimal(zeroed, chr(0)) is None
