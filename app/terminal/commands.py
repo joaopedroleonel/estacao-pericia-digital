@@ -7,6 +7,7 @@ from typing import Callable
 from flask import url_for
 from PIL import Image
 
+from app.services.cloud_storage import CloudError, sync_uploads
 from app.services.images import build_preview, find_image, list_images, sha256_file
 from app.services.metadata import ImageMetadata, extract_metadata
 from app.terminal import messages
@@ -59,17 +60,19 @@ def list_extracted(context: TerminalContext) -> TerminalResponse:
 
 
 def list_uploads(context: TerminalContext) -> TerminalResponse:
+    response = _sync_uploads(context)
     names = [path.name for path in list_images(Path(context.config["UPLOADS_DIR"]))]
     if not names:
-        return error(messages.NO_UPLOADS)
-    return _file_list(names)
+        return response.add(messages.NO_UPLOADS, "error")
+    return response.extend(_file_list(names))
 
 
 def open_latest(context: TerminalContext) -> TerminalResponse:
+    response = _sync_uploads(context)
     images = list_images(Path(context.config["UPLOADS_DIR"]))
     if not images:
-        return error(messages.NO_UPLOADS)
-    return _open(context, images[0])
+        return response.add(messages.NO_UPLOADS, "error")
+    return response.extend(_open(context, images[0]))
 
 
 def open_image(context: TerminalContext) -> TerminalResponse:
@@ -149,6 +152,19 @@ def _open(context: TerminalContext, path: Path) -> TerminalResponse:
     }
     if metadata.has_gps:
         response.state["map"] = _photo_map_state(metadata)
+    return response
+
+
+def _sync_uploads(context: TerminalContext) -> TerminalResponse:
+    response = TerminalResponse()
+    if context.cloud is None:
+        return response
+    try:
+        downloaded = sync_uploads(context.cloud, Path(context.config["UPLOADS_DIR"]))
+    except CloudError:
+        return response.add(messages.CLOUD_SYNC_FAILED, "error")
+    if downloaded:
+        response.add(messages.CLOUD_SYNCED.format(count=downloaded), "success")
     return response
 
 

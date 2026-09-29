@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import hashlib
-import secrets
-from datetime import datetime
-from io import BytesIO
 from pathlib import Path
 from typing import Iterable
 
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageOps
 
 from app.utils import is_safe_filename
 
@@ -20,32 +17,7 @@ else:
     register_heif_opener()
 
 
-FORMAT_EXTENSIONS = {"JPEG": ".jpg", "MPO": ".jpg", "PNG": ".png", "WEBP": ".webp", "HEIF": ".heic"}
-
 HASH_CHUNK_SIZE = 1024 * 1024
-
-
-class InvalidImageError(Exception):
-    pass
-
-
-def validate_upload(data: bytes) -> str:
-    try:
-        with Image.open(BytesIO(data)) as image:
-            image_format = image.format
-            image.verify()
-    except (UnidentifiedImageError, OSError, SyntaxError, ValueError) as error:
-        raise InvalidImageError from error
-    if image_format not in FORMAT_EXTENSIONS:
-        raise InvalidImageError
-    return FORMAT_EXTENSIONS[image_format]
-
-
-def save_upload(data: bytes, uploads_dir: Path) -> Path:
-    extension = validate_upload(data)
-    path = uploads_dir / f"upload_{datetime.now():%Y%m%d_%H%M%S}_{secrets.token_hex(2)}{extension}"
-    path.write_bytes(data)
-    return path
 
 
 def build_preview(source: Path, previews_dir: Path, max_size: int) -> Path:

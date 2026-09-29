@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inserir foto</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='camera.css') }}">
+</head>
+<body>
+  <main class="camera">
+    <label class="button">
+      Inserir foto
+      <input class="camera-input" id="photo-input" type="file" accept="image/*">
+    </label>
+    <p class="upload-status" id="upload-status" aria-live="polite"></p>
+  </main>
+  <script type="module" src="{{ url_for('static', filename='camera.js') }}"></script>
+</body>
+</html>

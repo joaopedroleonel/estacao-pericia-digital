@@ -49,7 +49,8 @@ def app(tmp_path):
             "TESTING": True,
             "SECRET_KEY": "test-secret",
             "ACCESS_CODE": "1234",
-            "CAMERA_TOKEN": "camera-token",
+            "SUPABASE_URL": "",
+            "SUPABASE_SECRET_KEY": "",
             "TIMELINE_DATE": "2026-09-24",
             "DATA_DIR": tmp_path,
         }

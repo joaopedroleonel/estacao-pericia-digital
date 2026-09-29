@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ status }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='camera.css') }}">
+</head>
+<body>
+  <main class="camera">
+    <p class="upload-status is-error">
+      {% if status == 403 %}
+      Link inválido. Escaneie o QR code novamente.
+      {% elif status == 404 %}
+      Página não encontrada.
+      {% else %}
+      Algo deu errado.
+      {% endif %}
+    </p>
+  </main>
+</body>
+</html>

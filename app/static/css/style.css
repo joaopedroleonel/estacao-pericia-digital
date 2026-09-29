@@ -110,11 +110,6 @@ body {
   cursor: pointer;
 }
 
-.button-large {
-  padding: 20px 16px;
-  font-size: 20px;
-}
-
 .form-message {
   min-height: 1.5em;
   margin: 16px 0 0;
@@ -123,10 +118,6 @@ body {
 
 .form-message.is-error {
   color: var(--color-error);
-}
-
-.form-message.is-success {
-  color: var(--color-success);
 }
 
 .login-form {
@@ -154,15 +145,6 @@ body {
 
 .login-code:focus {
   outline: 2px solid var(--color-accent);
-}
-
-.camera {
-  width: min(360px, 100%);
-  text-align: center;
-}
-
-.camera-input {
-  display: none;
 }
 
 .dashboard {

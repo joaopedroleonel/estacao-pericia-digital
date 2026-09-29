@@ -22,6 +22,7 @@ def terminal():
         config=current_app.config,
         adb=current_app.extensions["adb"],
         timeline=current_app.extensions["timeline"],
+        cloud=current_app.extensions["cloud"],
         session=session,
     )
     return jsonify(run_command(command, context).to_dict())

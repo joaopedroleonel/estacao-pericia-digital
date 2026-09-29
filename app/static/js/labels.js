@@ -33,6 +33,8 @@ export const loadingMessages = {
   device: "conectando ao dispositivo...",
   photos: "lendo a galeria do dispositivo...",
   pull: "copiando arquivo do dispositivo...",
+  uploads: "sincronizando com a nuvem...",
+  latest: "sincronizando com a nuvem...",
 };
 
 export const text = {
@@ -42,16 +44,6 @@ export const text = {
   activityEnd: "Fim",
   unknownActivity: "Deslocamento",
   requestFailed: "falha ao falar com o servidor",
-  uploadSending: "Enviando…",
-  uploadDone: "Foto enviada! Olhe para a tela",
-};
-
-export const uploadErrors = {
-  invalid_image: "O arquivo não é uma imagem válida",
-  too_large: "Foto grande demais",
-  forbidden: "Link inválido. Escaneie o QR code novamente",
-  missing_file: "Nenhuma foto selecionada",
-  request_failed: "Não foi possível enviar. Tente de novo",
 };
 
 export function formatBinary(bytes) {

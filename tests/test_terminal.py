@@ -1,6 +1,7 @@
 import pytest
 
 from app.services.adb import AdbError
+from app.services.cloud_storage import CloudError
 from app.services.images import sha256_file
 
 
@@ -24,6 +25,29 @@ class FakeAdb:
     def _raise_failure(self):
         if self.failure:
             raise AdbError(self.failure)
+
+
+class FakeCloud:
+    def __init__(self, files=None, failing=False):
+        self.files = dict(files or {})
+        self.failing = failing
+
+    def list_files(self):
+        self._raise_failure()
+        return sorted(self.files)
+
+    def download(self, name):
+        self._raise_failure()
+        return self.files[name]
+
+    def delete(self, names):
+        self._raise_failure()
+        for name in names:
+            self.files.pop(name, None)
+
+    def _raise_failure(self):
+        if self.failing:
+            raise CloudError("offline")
 
 
 @pytest.fixture
@@ -158,3 +182,37 @@ def test_map_commands(run, uploaded_photo):
 
 def test_terminal_requires_json(logged_client):
     assert logged_client.post("/api/terminal", data="help").status_code == 415
+
+
+def test_uploads_downloads_and_removes_cloud_files(app, run, tmp_path, photo_factory):
+    photo = photo_factory(tmp_path / "cloud.jpg").read_bytes()
+    cloud = FakeCloud({"upload_20260929_101000_aaaa.jpg": photo})
+    app.extensions["cloud"] = cloud
+    result = run("uploads")
+    assert texts(result) == ["1 foto(s) nova(s) baixada(s) da nuvem", "upload_20260929_101000_aaaa.jpg"]
+    assert (app.config["UPLOADS_DIR"] / "upload_20260929_101000_aaaa.jpg").read_bytes() == photo
+    assert cloud.files == {}
+
+
+def test_sync_keeps_existing_local_file_and_clears_cloud(app, run, uploaded_photo):
+    original = uploaded_photo.read_bytes()
+    cloud = FakeCloud({uploaded_photo.name: b"other bytes"})
+    app.extensions["cloud"] = cloud
+    assert texts(run("uploads")) == [uploaded_photo.name]
+    assert uploaded_photo.read_bytes() == original
+    assert cloud.files == {}
+
+
+def test_sync_failure_still_lists_local_photos(app, run, uploaded_photo):
+    app.extensions["cloud"] = FakeCloud({"upload_x.jpg": b""}, failing=True)
+    result = run("uploads")
+    assert texts(result) == ["não foi possível sincronizar com a nuvem", uploaded_photo.name]
+    assert styles(result)[0] == "error"
+
+
+def test_latest_opens_photo_downloaded_from_cloud(app, run, uploaded_photo, tmp_path, photo_factory):
+    photo = photo_factory(tmp_path / "cloud.jpg").read_bytes()
+    app.extensions["cloud"] = FakeCloud({"upload_20260929_110000_bbbb.jpg": photo})
+    result = run("latest")
+    assert texts(result)[0] == "1 foto(s) nova(s) baixada(s) da nuvem"
+    assert result["state"]["image"]["name"] == "upload_20260929_110000_bbbb.jpg"

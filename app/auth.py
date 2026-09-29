@@ -6,7 +6,7 @@ import time
 from functools import wraps
 from typing import Callable
 
-from flask import abort, current_app, jsonify, redirect, request, session, url_for
+from flask import current_app, jsonify, redirect, request, session, url_for
 
 
 class LoginLimiter:
@@ -44,16 +44,6 @@ def login_required(view: Callable) -> Callable:
         if request.path.startswith("/api/"):
             return jsonify(error="unauthorized"), 401
         return redirect(url_for("auth.login_page"))
-
-    return wrapper
-
-
-def camera_token_required(view: Callable) -> Callable:
-    @wraps(view)
-    def wrapper(*args, **kwargs):
-        if not _matches(request.args.get("token", ""), current_app.config["CAMERA_TOKEN"]):
-            abort(403)
-        return view(*args, **kwargs)
 
     return wrapper
 

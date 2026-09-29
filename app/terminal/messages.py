@@ -34,6 +34,10 @@ NO_EXTRACTED = "nenhuma foto copiada do celular ainda. Use pull <file>"
 
 NO_UPLOADS = "nenhuma foto recebida ainda"
 
+CLOUD_SYNCED = "{count} foto(s) nova(s) baixada(s) da nuvem"
+
+CLOUD_SYNC_FAILED = "não foi possível sincronizar com a nuvem"
+
 IMAGE_NOT_FOUND = "imagem não encontrada: {name}"
 
 IMAGE_UNREADABLE = "não foi possível ler a imagem"

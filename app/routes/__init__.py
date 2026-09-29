@@ -3,7 +3,6 @@ from werkzeug.exceptions import HTTPException
 
 from app.routes.api import api_bp
 from app.routes.auth import auth_bp
-from app.routes.camera import camera_bp
 from app.routes.dashboard import dashboard_bp
 
 
@@ -12,13 +11,12 @@ ERROR_CODES = {
     403: "forbidden",
     404: "not_found",
     405: "method_not_allowed",
-    413: "too_large",
     415: "unsupported_media_type",
 }
 
 
 def register_blueprints(app: Flask) -> None:
-    for blueprint in (auth_bp, dashboard_bp, camera_bp, api_bp):
+    for blueprint in (auth_bp, dashboard_bp, api_bp):
         app.register_blueprint(blueprint)
 
 

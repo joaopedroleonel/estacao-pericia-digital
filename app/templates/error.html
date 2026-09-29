@@ -7,11 +7,9 @@
   <h1 class="card-title">{{ status }}</h1>
   <p class="card-text">
     {% if status == 403 %}
-    Acesso negado. Escaneie o QR code novamente.
+    Acesso negado.
     {% elif status == 404 %}
     Página não encontrada.
-    {% elif status == 413 %}
-    Arquivo grande demais.
     {% else %}
     Algo deu errado.
     {% endif %}
