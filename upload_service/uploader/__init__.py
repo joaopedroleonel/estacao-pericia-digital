@@ -3,7 +3,7 @@ from __future__ import annotations
 from flask import Flask, current_app, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
-from uploader.config import REQUIRED_SETTINGS, Config
+from uploader.config import REQUIRED_SETTINGS, STATIC_DIR, Config
 from uploader.routes import upload_bp
 from uploader.storage import StorageError, StorageNotFoundError, SupabaseStorage
 
@@ -12,7 +12,7 @@ ERROR_CODES = {400: "bad_request", 403: "forbidden", 404: "not_found", 405: "met
 
 
 def create_app(overrides: dict | None = None) -> Flask:
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=str(STATIC_DIR))
     app.config.from_object(Config)
     app.config.update(overrides or {})
     missing = [name for name in REQUIRED_SETTINGS if not app.config.get(name)]

@@ -21,6 +21,13 @@ def test_camera_page_requires_token(client):
     assert client.get("/camera?token=camera-token").status_code == 200
 
 
+@pytest.mark.parametrize("asset", ["camera.css", "camera.js", "labels.js"])
+def test_static_assets_are_served_from_public(client, asset):
+    response = client.get(f"/static/{asset}")
+    assert response.status_code == 200
+    response.close()
+
+
 def test_api_requires_token(client):
     response = client.post("/api/uploads?token=wrong")
     assert response.status_code == 403

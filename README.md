@@ -77,7 +77,7 @@ A chave secreta do Supabase fica só no Vercel e no `.env` do notebook. O navega
 cd upload_service
 pip install -r requirements-dev.txt
 copy .env.example .env
-flask --app api/index.py run --port 5100
+flask --app app run --port 5100
 ```
 
 Preencha o `upload_service/.env`:
@@ -95,7 +95,7 @@ A página fica em `http://localhost:5100/camera?token=SEU_CAMERA_TOKEN`.
 
 1. Importe o repositório no Vercel e defina **Root Directory** como `upload_service`.
 2. Cadastre as mesmas variáveis do `upload_service/.env` em Settings, Environment Variables.
-3. Faça o deploy. O `vercel.json` já direciona todas as rotas para o Flask em `api/index.py`.
+3. Faça o deploy. O Vercel detecta o Flask sozinho pelo `app.py` e serve o CSS e o JavaScript da pasta `public/` pela CDN.
 
 Gere o QR code com a URL:
 
@@ -167,10 +167,10 @@ app/                  dashboard do notebook
 ├── templates/        páginas HTML
 └── static/           CSS, JavaScript e Leaflet local
 upload_service/       microserviço de envio de fotos (Vercel)
-├── api/index.py      ponto de entrada do Vercel
-├── uploader/         rotas, validação da imagem, cliente do Supabase e página "Inserir foto"
-├── tests/            testes com pytest
-└── vercel.json       configuração do deploy
+├── app.py            ponto de entrada (o Vercel procura o Flask aqui)
+├── uploader/         rotas, validação da imagem, cliente do Supabase e templates
+├── public/static/    CSS e JavaScript da página "Inserir foto"
+└── tests/            testes com pytest
 scripts/
 └── phone_window.py   abre o scrcpy posicionado e com cantos arredondados
 tests/                testes do dashboard com pytest
