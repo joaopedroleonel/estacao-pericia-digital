@@ -7,7 +7,7 @@ Sistema da estação de perícia digital do projeto Perito Orienta 2026. Quase t
 - **Flask (notebook)** serve o login, o dashboard e uma API JSON.
 - **ADB** lê o celular conectado por USB e copia as fotos da câmera.
 - **Pillow** (com `pillow-heif`) extrai EXIF e GPS e gera prévias. A foto original nunca é alterada.
-- **Leaflet + OpenStreetMap** desenham a linha do tempo lida de `data/timeline.json`.
+- **Leaflet + OpenStreetMap** desenham a linha do tempo lida de `dashboard/data/timeline.json`.
 - **scrcpy** espelha o celular numa janela sem borda por cima da primeira coluna do dashboard.
 - **Microserviço de envio (Vercel)** publica a página "Inserir foto", valida a imagem e a guarda no **Supabase Storage**.
 
@@ -21,14 +21,17 @@ Sistema da estação de perícia digital do projeto Perito Orienta 2026. Quase t
 
 ## Instalação
 
+O repositório tem duas pastas independentes: `dashboard/` (o sistema do notebook) e `upload_service/` (o microserviço de envio de fotos). Um único `.venv` na raiz serve para desenvolver os dois.
+
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+cd dashboard
 pip install -r requirements.txt
 copy .env.example .env
 ```
 
-Preencha o `.env`:
+Preencha o `dashboard/.env`:
 
 | Variável | O que é | Como gerar |
 |---|---|---|
@@ -47,12 +50,13 @@ O `.env` fica fora do git. Nunca publique esses valores.
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
+cd dashboard
 python run.py
 ```
 
 Acesse `http://localhost:5000` e entre com o `ACCESS_CODE`. Depois de 5 códigos errados, o login fica bloqueado por 5 minutos.
 
-A linha do tempo é lida só quando o servidor inicia. Se trocar o `data/timeline.json`, reinicie o servidor.
+A linha do tempo é lida só quando o servidor inicia. Se trocar o `dashboard/data/timeline.json`, reinicie o servidor.
 
 ## Envio de fotos (microserviço)
 
@@ -61,9 +65,9 @@ A página de envio fica na pasta `upload_service/`, que é publicada separadamen
 1. A página pede à API uma URL de envio. A API confere o token do QR code e pede ao Supabase uma URL assinada, válida para um único arquivo em `pending/`.
 2. O navegador envia a foto **direto para o Supabase**, com os bytes originais. A foto não passa pelo Vercel, então o limite de 4,5 MB do Vercel não se aplica.
 3. A página avisa a API que terminou. A API baixa o arquivo, valida com o Pillow (JPEG, JPEG HDR do iPhone, PNG, WEBP e HEIC) e move para a raiz do bucket como `upload_AAAAMMDD_HHMMSS_xxxx.<ext>`. Se não for uma imagem válida, apaga e mostra o erro ao aluno.
-4. No dashboard, `uploads` e `latest` baixam as fotos da raiz do bucket para `data/uploads/` e apagam da nuvem.
+4. No dashboard, `uploads` e `latest` baixam as fotos da raiz do bucket para `dashboard/data/uploads/` e apagam da nuvem.
 
-A chave secreta do Supabase fica só no Vercel e no `.env` do notebook. O navegador recebe apenas a URL assinada, que não lê, não lista e não apaga nada.
+A chave secreta do Supabase fica só no Vercel e no `dashboard/.env`. O navegador recebe apenas a URL assinada, que não lê, não lista e não apaga nada.
 
 ### Configurar o Supabase
 
@@ -112,10 +116,11 @@ Quem tiver o QR code consegue enviar fotos. Troque o `CAMERA_TOKEN` depois de ca
 | `help` | lista os comandos |
 | `device` | mostra fabricante, modelo e versão do Android do celular |
 | `photos` | lista as 10 fotos mais recentes da câmera do celular |
-| `pull <file>` | copia uma foto do celular para `data/extracted/` e mostra o SHA-256 |
+| `pull <file>` | copia uma foto do celular para `dashboard/data/extracted/` e mostra o SHA-256 |
 | `extracted` | lista as fotos já copiadas do celular |
 | `uploads` | baixa da nuvem as fotos novas enviadas pelo QR code, apaga da nuvem e lista todas |
 | `latest` | baixa as fotos novas da nuvem e abre a última enviada |
+| `clear-uploads` | apaga todas as fotos de `dashboard/data/uploads/` e as prévias delas (não mexe na nuvem nem em `extracted/`) |
 | `open <file>` | abre uma imagem de `uploads/` ou `extracted/` no painel |
 | `exif` | mostra o resumo dos metadados da imagem aberta |
 | `hash` | calcula o SHA-256 do arquivo original da imagem aberta |
@@ -129,12 +134,12 @@ As setas ↑ e ↓ repetem comandos anteriores. Os comandos que usam o ADB ou a 
 
 | Pasta | Conteúdo |
 |---|---|
-| `data/timeline.json` | linha do tempo exportada do Google Maps (formato `semanticSegments`) |
-| `data/extracted/` | fotos originais copiadas do celular pelo `pull` |
-| `data/uploads/` | fotos originais enviadas pelos alunos e baixadas da nuvem |
-| `data/previews/` | cópias leves geradas só para exibir na tela |
+| `dashboard/data/timeline.json` | linha do tempo exportada do Google Maps (formato `semanticSegments`) |
+| `dashboard/data/extracted/` | fotos originais copiadas do celular pelo `pull` |
+| `dashboard/data/uploads/` | fotos originais enviadas pelos alunos e baixadas da nuvem |
+| `dashboard/data/previews/` | cópias leves geradas só para exibir na tela |
 
-Toda a pasta `data/` fica fora do git, porque guarda fotos e histórico de localização reais.
+Toda a pasta `dashboard/data/` fica fora do git, porque guarda fotos e histórico de localização reais.
 
 ## Metadados das fotos
 
@@ -146,8 +151,9 @@ Toda a pasta `data/` fica fora do git, porque guarda fotos e histórico de local
 ## Testes
 
 ```powershell
+cd dashboard
 python -m pytest
-cd upload_service
+cd ..\upload_service
 python -m pytest
 ```
 
@@ -156,23 +162,27 @@ Os testes usam pastas temporárias, um ADB falso e um Supabase falso, então nã
 ## Estrutura
 
 ```
-app/                  dashboard do notebook
-├── __init__.py       create_app: configuração, pastas de dados, timeline, nuvem e rotas
-├── config.py         lê o .env
-├── auth.py           login e limite de tentativas
-├── utils.py          validação de nomes de arquivo e conversão de coordenadas
-├── routes/           rotas HTTP (login, dashboard e API)
-├── services/         ADB, imagens, metadados, linha do tempo e sincronização com o Supabase
-├── terminal/         comandos do terminal e mensagens exibidas
-├── templates/        páginas HTML
-└── static/           CSS, JavaScript e Leaflet local
-upload_service/       microserviço de envio de fotos (Vercel)
-├── app.py            ponto de entrada (o Vercel procura o Flask aqui)
-├── uploader/         rotas, validação da imagem, cliente do Supabase e templates
-├── public/static/    CSS e JavaScript da página "Inserir foto"
-└── tests/            testes com pytest
-scripts/
-└── phone_window.py   abre o scrcpy posicionado e com cantos arredondados
-tests/                testes do dashboard com pytest
-data/                 dados locais (fora do git)
+dashboard/                dashboard do notebook
+├── app/
+│   ├── __init__.py       create_app: configuração, pastas de dados, timeline, nuvem e rotas
+│   ├── config.py         lê o dashboard/.env
+│   ├── auth.py           login e limite de tentativas
+│   ├── utils.py          validação de nomes de arquivo e conversão de coordenadas
+│   ├── routes/           rotas HTTP (login, dashboard e API)
+│   ├── services/         ADB, imagens, metadados, linha do tempo e sincronização com o Supabase
+│   ├── terminal/         comandos do terminal e mensagens exibidas
+│   ├── templates/        páginas HTML
+│   └── static/           CSS, JavaScript e Leaflet local
+├── scripts/
+│   └── phone_window.py   abre o scrcpy posicionado e com cantos arredondados
+├── tests/                testes com pytest
+├── data/                 dados locais (fora do git)
+├── run.py                inicia o servidor
+└── requirements.txt
+upload_service/           microserviço de envio de fotos (Vercel)
+├── app.py                ponto de entrada (o Vercel procura o Flask aqui)
+├── uploader/             rotas, validação da imagem, cliente do Supabase e templates
+├── public/static/        CSS e JavaScript da página "Inserir foto"
+├── tests/                testes com pytest
+└── requirements.txt
 ```

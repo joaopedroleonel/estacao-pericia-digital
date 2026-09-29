@@ -8,7 +8,7 @@ from flask import url_for
 from PIL import Image
 
 from app.services.cloud_storage import CloudError, sync_uploads
-from app.services.images import build_preview, find_image, list_images, sha256_file
+from app.services.images import build_preview, delete_images, find_image, list_images, sha256_file
 from app.services.metadata import ImageMetadata, extract_metadata
 from app.terminal import messages
 from app.terminal.response import TerminalContext, TerminalResponse, error, success
@@ -75,6 +75,15 @@ def open_latest(context: TerminalContext) -> TerminalResponse:
     return response.extend(_open(context, images[0]))
 
 
+def clear_uploads(context: TerminalContext) -> TerminalResponse:
+    deleted = delete_images(Path(context.config["UPLOADS_DIR"]), Path(context.config["PREVIEWS_DIR"]))
+    if not deleted:
+        return error(messages.NO_UPLOADS)
+    if context.session.get("current_image") and _current_image(context) is None:
+        context.session.pop("current_image")
+    return success(messages.UPLOADS_CLEARED.format(count=deleted))
+
+
 def open_image(context: TerminalContext) -> TerminalResponse:
     name = context.args[0]
     path = find_image(name, _image_folders(context))
@@ -128,6 +137,7 @@ COMMANDS = {
     "extracted": Command(list_extracted, "extracted"),
     "uploads": Command(list_uploads, "uploads"),
     "latest": Command(open_latest, "latest"),
+    "clear-uploads": Command(clear_uploads, "clear-uploads"),
     "open": Command(open_image, "open <file>", 1),
     "exif": Command(show_exif, "exif"),
     "hash": Command(show_hash, "hash"),

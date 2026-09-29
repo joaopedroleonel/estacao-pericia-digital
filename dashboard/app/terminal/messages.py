@@ -12,6 +12,7 @@ DESCRIPTIONS = {
     "extracted": "lista as fotos já copiadas do celular",
     "uploads": "lista as fotos enviadas pelo QR code",
     "latest": "abre a última foto enviada",
+    "clear-uploads": "apaga todas as fotos recebidas pelo QR code",
     "open": "abre uma imagem no painel",
     "exif": "mostra o resumo dos metadados",
     "hash": "calcula o SHA-256 da imagem aberta",
@@ -33,6 +34,8 @@ OPEN_HINT = "use open {name} para ver a imagem"
 NO_EXTRACTED = "nenhuma foto copiada do celular ainda. Use pull <file>"
 
 NO_UPLOADS = "nenhuma foto recebida ainda"
+
+UPLOADS_CLEARED = "{count} foto(s) apagada(s) de uploads"
 
 CLOUD_SYNCED = "{count} foto(s) nova(s) baixada(s) da nuvem"
 

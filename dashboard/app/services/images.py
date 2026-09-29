@@ -20,8 +20,12 @@ else:
 HASH_CHUNK_SIZE = 1024 * 1024
 
 
+def preview_path(source: Path, previews_dir: Path) -> Path:
+    return previews_dir / f"{source.parent.name}_{source.stem}.jpg"
+
+
 def build_preview(source: Path, previews_dir: Path, max_size: int) -> Path:
-    target = previews_dir / f"{source.parent.name}_{source.stem}.jpg"
+    target = preview_path(source, previews_dir)
     if target.exists() and target.stat().st_mtime >= source.stat().st_mtime:
         return target
     with Image.open(source) as image:
@@ -47,6 +51,14 @@ def find_image(name: str, folders: Iterable[Path]) -> Path | None:
         if path.is_file():
             return path
     return None
+
+
+def delete_images(folder: Path, previews_dir: Path) -> int:
+    images = list_images(folder)
+    for path in images:
+        preview_path(path, previews_dir).unlink(missing_ok=True)
+        path.unlink()
+    return len(images)
 
 
 def list_images(folder: Path) -> list[Path]:

@@ -163,6 +163,26 @@ def test_open_image_without_gps_keeps_map(app, run, photo_factory):
     assert styles(run("map photo")) == ["error"]
 
 
+def test_clear_uploads_deletes_photos_and_previews(app, run, uploaded_photo, photo_factory):
+    photo_factory(app.config["UPLOADS_DIR"] / "upload_20260924_150000_b1c2.jpg")
+    run(f"open {uploaded_photo.name}")
+    result = run("clear-uploads")
+    assert texts(result) == ["2 foto(s) apagada(s) de uploads"]
+    assert list(app.config["UPLOADS_DIR"].iterdir()) == []
+    assert list(app.config["PREVIEWS_DIR"].iterdir()) == []
+    assert styles(run("exif")) == ["error"]
+
+
+def test_clear_uploads_without_photos(run):
+    assert styles(run("clear-uploads")) == ["error"]
+
+
+def test_clear_uploads_keeps_extracted_photos(app, run, photo_factory, uploaded_photo):
+    extracted = photo_factory(app.config["EXTRACTED_DIR"] / "IMG_20260924_1432.jpg")
+    run("clear-uploads")
+    assert extracted.exists()
+
+
 def test_exif_and_hash_need_open_image(run):
     assert styles(run("exif")) == ["error"]
     assert styles(run("hash")) == ["error"]
