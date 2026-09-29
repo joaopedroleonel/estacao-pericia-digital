@@ -1,0 +1,47 @@
+{
+  "semanticSegments": [
+    {
+      "startTime": "2026-09-24T08:00:00.000-03:00",
+      "endTime": "2026-09-24T08:30:00.000-03:00",
+      "timelinePath": [
+        { "point": "-24.5561°, -54.0571°", "time": "2026-09-24T08:02:00.000-03:00" },
+        { "point": "-24.5583°, -54.0549°", "time": "2026-09-24T08:14:00.000-03:00" }
+      ]
+    },
+    {
+      "startTime": "2026-09-24T08:30:00.000-03:00",
+      "endTime": "2026-09-24T12:00:00.000-03:00",
+      "visit": {
+        "probability": 0.92,
+        "topCandidate": {
+          "placeId": "ChIJ...",
+          "semanticType": "UNKNOWN",
+          "probability": 0.85,
+          "placeLocation": { "latLng": "-24.5602°, -54.0610°" }
+        }
+      }
+    },
+    {
+      "startTime": "2026-09-24T12:00:00.000-03:00",
+      "endTime": "2026-09-24T12:20:00.000-03:00",
+      "activity": {
+        "start": { "latLng": "-24.5602°, -54.0610°" },
+        "end": { "latLng": "-24.5530°, -54.0480°" },
+        "distanceMeters": 1850.4,
+        "topCandidate": { "type": "IN_PASSENGER_VEHICLE", "probability": 0.9 }
+      }
+    }
+  ],
+  "rawSignals": [
+    {
+      "position": {
+        "LatLng": "-24.5561°, -54.0571°",
+        "accuracyMeters": 13,
+        "altitudeMeters": 412.3,
+        "source": "GPS",
+        "timestamp": "2026-09-24T08:02:11.000-03:00"
+      }
+    }
+  ],
+  "userLocationProfile": { }
+}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/leaflet/leaflet.css') }}">
+{% endblock %}
+
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block content %}
+<main class="dashboard">
+  <section class="panel phone-panel">
+    <h2 class="panel-title">Celular ao vivo</h2>
+  </section>
+
+  <section class="panel image-panel" id="image-panel">
+    <h2 class="panel-title">Imagem extraída</h2>
+    <div class="image-viewer">
+      <img class="image-preview" alt="Imagem aberta" hidden>
+      <svg class="image-placeholder" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+        <circle cx="16" cy="8" r="1.5"></circle>
+        <path d="M3 17l5-5 4 4 2-2 7 7"></path>
+      </svg>
+    </div>
+    <div class="image-details">
+      <dl class="image-summary"></dl>
+      <dl class="image-tags"></dl>
+    </div>
+  </section>
+
+  <div class="column">
+    <section class="panel map-panel">
+      <h2 class="panel-title">Linha do tempo</h2>
+      <div class="map" id="map"></div>
+      <p class="map-empty" id="map-empty" hidden>Linha do tempo indisponível</p>
+    </section>
+
+    <section class="terminal" id="terminal">
+      <div class="terminal-output"></div>
+      <form class="terminal-line">
+        <span class="terminal-prompt">perito@liaf:~$</span>
+        <input class="terminal-input" type="text" autocomplete="off" spellcheck="false" autofocus aria-label="Comando">
+      </form>
+    </section>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/leaflet/leaflet.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
