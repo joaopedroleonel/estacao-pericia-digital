@@ -2,13 +2,11 @@ from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
 from app.routes.api import api_bp
-from app.routes.auth import auth_bp
 from app.routes.dashboard import dashboard_bp
 
 
 ERROR_CODES = {
     400: "bad_request",
-    403: "forbidden",
     404: "not_found",
     405: "method_not_allowed",
     415: "unsupported_media_type",
@@ -16,7 +14,7 @@ ERROR_CODES = {
 
 
 def register_blueprints(app: Flask) -> None:
-    for blueprint in (auth_bp, dashboard_bp, api_bp):
+    for blueprint in (dashboard_bp, api_bp):
         app.register_blueprint(blueprint)
 
 

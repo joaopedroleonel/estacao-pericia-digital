@@ -51,11 +51,11 @@ class FakeCloud:
 
 
 @pytest.fixture
-def run(app, logged_client, photo_factory):
+def run(app, client, photo_factory):
     app.extensions["adb"] = FakeAdb(photo_factory)
 
     def send(command):
-        response = logged_client.post("/api/terminal", json={"command": command})
+        response = client.post("/api/terminal", json={"command": command})
         assert response.status_code == 200
         return response.get_json()
 
@@ -143,10 +143,10 @@ def test_latest_opens_newest_upload(run, uploaded_photo):
     assert result["state"]["map"] == {"action": "photo", "lat": -24.558, "lng": -54.056}
 
 
-def test_open_serves_preview(run, logged_client, uploaded_photo):
+def test_open_serves_preview(run, client, uploaded_photo):
     result = run(f"open {uploaded_photo.name}")
     assert texts(result) == ["imagem carregada · GPS encontrado"]
-    preview = logged_client.get(result["state"]["image"]["previewUrl"])
+    preview = client.get(result["state"]["image"]["previewUrl"])
     assert preview.status_code == 200
     assert preview.mimetype == "image/jpeg"
 
@@ -200,8 +200,8 @@ def test_map_commands(run, uploaded_photo):
     assert run("map photo")["state"]["map"] == {"action": "photo", "lat": -24.558, "lng": -54.056}
 
 
-def test_terminal_requires_json(logged_client):
-    assert logged_client.post("/api/terminal", data="help").status_code == 415
+def test_terminal_requires_json(client):
+    assert client.post("/api/terminal", data="help").status_code == 415
 
 
 def test_uploads_downloads_and_removes_cloud_files(app, run, tmp_path, photo_factory):

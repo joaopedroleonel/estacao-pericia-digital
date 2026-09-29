@@ -6,9 +6,7 @@
 <main class="card">
   <h1 class="card-title">{{ status }}</h1>
   <p class="card-text">
-    {% if status == 403 %}
-    Acesso negado.
-    {% elif status == 404 %}
+    {% if status == 404 %}
     Página não encontrada.
     {% else %}
     Algo deu errado.

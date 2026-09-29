@@ -4,7 +4,7 @@ Sistema da estação de perícia digital do projeto Perito Orienta 2026. Quase t
 
 ## Como funciona
 
-- **Flask (notebook)** serve o login, o dashboard e uma API JSON.
+- **Flask (notebook)** serve o dashboard e uma API JSON, só para o próprio notebook (`127.0.0.1`).
 - **ADB** lê o celular conectado por USB e copia as fotos da câmera.
 - **Pillow** (com `pillow-heif`) extrai EXIF e GPS e gera prévias. A foto original nunca é alterada.
 - **Leaflet + OpenStreetMap** desenham a linha do tempo lida de `dashboard/data/timeline.json`.
@@ -35,8 +35,6 @@ Preencha o `dashboard/.env`:
 
 | Variável | O que é | Como gerar |
 |---|---|---|
-| `SECRET_KEY` | chave da sessão do Flask | `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `ACCESS_CODE` | código de 4 dígitos do login | escolha um número |
 | `TIMELINE_DATE` | dia da linha do tempo exibido no mapa (`AAAA-MM-DD`) | vazio mostra todos os dias |
 | `SUPABASE_URL` | endereço do projeto no Supabase | Project Settings, API |
 | `SUPABASE_SECRET_KEY` | chave secreta do Supabase (`sb_secret_...` ou a antiga `service_role`) | Project Settings, API Keys |
@@ -54,7 +52,7 @@ cd dashboard
 python run.py
 ```
 
-Acesse `http://localhost:5000` e entre com o `ACCESS_CODE`. Depois de 5 códigos errados, o login fica bloqueado por 5 minutos.
+Acesse `http://localhost:5000`. O dashboard não tem login porque só aceita conexões do próprio notebook: outros aparelhos da rede não conseguem abrir.
 
 A linha do tempo é lida só quando o servidor inicia. Se trocar o `dashboard/data/timeline.json`, reinicie o servidor.
 
@@ -166,9 +164,8 @@ dashboard/                dashboard do notebook
 ├── app/
 │   ├── __init__.py       create_app: configuração, pastas de dados, timeline, nuvem e rotas
 │   ├── config.py         lê o dashboard/.env
-│   ├── auth.py           login e limite de tentativas
 │   ├── utils.py          validação de nomes de arquivo e conversão de coordenadas
-│   ├── routes/           rotas HTTP (login, dashboard e API)
+│   ├── routes/           rotas HTTP (dashboard e API)
 │   ├── services/         ADB, imagens, metadados, linha do tempo e sincronização com o Supabase
 │   ├── terminal/         comandos do terminal e mensagens exibidas
 │   ├── templates/        páginas HTML

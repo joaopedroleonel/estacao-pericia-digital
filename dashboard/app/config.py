@@ -1,4 +1,5 @@
 import os
+import secrets
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -10,8 +11,7 @@ load_dotenv(BASE_DIR / ".env")
 
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "")
-    ACCESS_CODE = os.environ.get("ACCESS_CODE", "")
+    SECRET_KEY = secrets.token_hex(32)
     TIMELINE_DATE = os.environ.get("TIMELINE_DATE", "")
     ADB_PATH = os.environ.get("ADB_PATH", "adb")
     SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
@@ -23,9 +23,5 @@ class Config:
     PHOTOS_LIST_LIMIT = 10
     PREVIEW_MAX_SIZE = 1600
     CLOUD_TIMEOUT_SECONDS = 20
-    LOGIN_MAX_ATTEMPTS = 5
-    LOGIN_LOCK_SECONDS = 300
     SESSION_COOKIE_SAMESITE = "Lax"
 
-
-REQUIRED_SETTINGS = ("SECRET_KEY", "ACCESS_CODE")

@@ -1,6 +1,5 @@
 from flask import Blueprint, current_app, jsonify, request, send_from_directory, session
 
-from app.auth import login_required
 from app.terminal import run_command
 from app.terminal.response import TerminalContext
 
@@ -11,7 +10,6 @@ api_bp = Blueprint("api", __name__)
 
 
 @api_bp.post("/api/terminal")
-@login_required
 def terminal():
     if not request.is_json:
         return jsonify(error="unsupported_media_type"), 415
@@ -29,12 +27,10 @@ def terminal():
 
 
 @api_bp.get("/api/images/<name>")
-@login_required
 def image_preview(name: str):
     return send_from_directory(current_app.config["PREVIEWS_DIR"], name)
 
 
 @api_bp.get("/api/timeline")
-@login_required
 def timeline():
     return jsonify(current_app.extensions["timeline"].to_dict())

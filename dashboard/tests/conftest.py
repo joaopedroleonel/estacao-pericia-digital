@@ -47,8 +47,6 @@ def app(tmp_path):
     return create_app(
         {
             "TESTING": True,
-            "SECRET_KEY": "test-secret",
-            "ACCESS_CODE": "1234",
             "SUPABASE_URL": "",
             "SUPABASE_SECRET_KEY": "",
             "TIMELINE_DATE": "2026-09-24",
@@ -60,10 +58,3 @@ def app(tmp_path):
 @pytest.fixture
 def client(app):
     return app.test_client()
-
-
-@pytest.fixture
-def logged_client(client):
-    with client.session_transaction() as session:
-        session["authenticated"] = True
-    return client
