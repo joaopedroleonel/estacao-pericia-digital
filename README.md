@@ -1,4 +1,4 @@
-# Demonstração de Perícia Digital
+# Estação de Perícia Digital
 
 Projeto desenvolvido para ser apresentado no **Orienta 2026**, evento realizado pela Faculdade Donaduzzi. O objetivo é apresentar a perícia digital a alunos do ensino médio e mostrar que a faculdade oferece cursos que levam a essa área, como **Engenharia de Software** e quem tiver interesse direto em perícia também pode fazer parte da **LIAF** (Liga Interdisciplinar de Análises Forenses).
 
@@ -20,7 +20,7 @@ Os alunos também participam. Lendo um QR code, eles abrem uma página publicada
 - **Pillow** (com `pillow-heif`) extrai EXIF e GPS e gera prévias. A foto original nunca é alterada.
 - **Leaflet + OpenStreetMap** desenham a linha do tempo lida de `dashboard/data/timeline.json`.
 - **scrcpy** espelha o celular numa janela sem borda por cima da primeira coluna do dashboard.
-- **Microserviço de envio (Vercel)** publica a página "Inserir foto", valida a imagem e a guarda no **Supabase Storage**.
+- **Microserviço de envio** publica a página "Inserir foto", valida a imagem e a guarda no **Supabase Storage**.
 
 ## Requisitos
 
@@ -28,7 +28,7 @@ Os alunos também participam. Lendo um QR code, eles abrem uma página publicada
 - Python 3.9 ou mais novo
 - ADB e scrcpy no PATH (testado com scrcpy 3.3.4)
 - Celular Android com depuração USB ativada.
-- Conta gratuita no Supabase e no Vercel para o envio de fotos.
+- Conta no Supabase e uma hospedagem com suporte a Python para o microserviço de envio de fotos.
 
 ## Instalação
 
@@ -69,14 +69,14 @@ A linha do tempo é lida só quando o servidor inicia. Se trocar o `dashboard/da
 
 ## Envio de fotos (microserviço)
 
-A página de envio fica na pasta `upload_service/`, que é publicada separadamente no Vercel. O fluxo de cada foto:
+A página de envio fica na pasta `upload_service/`, que é publicada separadamente na nuvem. O fluxo de cada foto:
 
 1. A página pede à API uma URL de envio. A API confere o token do QR code e pede ao Supabase uma URL assinada, válida para um único arquivo em `pending/`.
-2. O navegador envia a foto **direto para o Supabase**, com os bytes originais. A foto não passa pelo Vercel, então o limite de 4,5 MB do Vercel não se aplica.
+2. O navegador envia a foto **direto para o Supabase**, com os bytes originais. A foto não passa pelo servidor do microserviço, então limites de tamanho da hospedagem não se aplicam a ela.
 3. A página avisa a API que terminou. A API baixa o arquivo, valida com o Pillow (JPEG, JPEG HDR do iPhone, PNG, WEBP e HEIC) e move para a raiz do bucket como `upload_AAAAMMDD_HHMMSS_xxxx.<ext>`. Se não for uma imagem válida, apaga e mostra o erro ao aluno.
 4. No dashboard, `uploads` e `latest` baixam as fotos da raiz do bucket para `dashboard/data/uploads/` e apagam da nuvem.
 
-A chave secreta do Supabase fica só no Vercel e no `dashboard/.env`. O navegador recebe apenas a URL assinada, que não lê, não lista e não apaga nada.
+A chave secreta do Supabase fica só nas variáveis de ambiente do microserviço e no `dashboard/.env`. O navegador recebe apenas a URL assinada, que não lê, não lista e não apaga nada.
 
 ### Configurar o Supabase
 
@@ -104,16 +104,16 @@ Preencha o `upload_service/.env`:
 
 A página fica em `http://localhost:5100/camera?token=SEU_CAMERA_TOKEN`.
 
-### Publicar no Vercel
+### Publicar o microserviço
 
-1. Importe o repositório no Vercel e defina **Root Directory** como `upload_service`.
-2. Cadastre as mesmas variáveis do `upload_service/.env` em Settings, Environment Variables.
-3. Faça o deploy. O Vercel detecta o Flask sozinho pelo `app.py` e serve o CSS e o JavaScript da pasta `public/` pela CDN.
+1. Na hospedagem, use a pasta `upload_service` como raiz do projeto.
+2. Cadastre as mesmas variáveis do `upload_service/.env` como variáveis de ambiente.
+3. Publique. O ponto de entrada é o `app` do Flask em `app.py`, e o CSS e o JavaScript ficam em `public/static/`.
 
 Gere o QR code com a URL:
 
 ```
-https://SEU-PROJETO.vercel.app/camera?token=SEU_CAMERA_TOKEN
+https://SEU-DOMINIO/camera?token=SEU_CAMERA_TOKEN
 ```
 
 Quem tiver o QR code consegue enviar fotos. Troque o `CAMERA_TOKEN` depois de cada evento.
@@ -187,8 +187,8 @@ dashboard/                dashboard rodado localmente
 ├── data/                 dados locais (fora do git)
 ├── run.py                inicia o servidor
 └── requirements.txt
-upload_service/           microserviço de envio de fotos (Vercel)
-├── app.py                ponto de entrada (o Vercel procura o Flask aqui)
+upload_service/           microserviço de envio de fotos
+├── app.py                ponto de entrada da aplicação Flask
 ├── uploader/             rotas, validação da imagem, cliente do Supabase e templates
 ├── public/static/        CSS e JavaScript da página "Inserir foto"
 ├── tests/                testes com pytest
