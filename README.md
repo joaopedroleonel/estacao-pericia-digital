@@ -1,10 +1,21 @@
-# Estação de Perícia Digital
+# Demonstração de Perícia Digital
 
-Sistema da estação de perícia digital do projeto Perito Orienta 2026. Quase tudo roda num notebook: um dashboard mostra o celular ao vivo, a imagem extraída com seus metadados, a linha do tempo de localização num mapa e um terminal fake onde o perito digita os comandos. Os alunos enviam fotos lendo um QR code que abre uma página publicada em um microserviço separado, e as fotos ficam guardadas na nuvem até o dashboard baixá-las.
+Projeto desenvolvido para ser apresentado no **Orienta 2026**, evento realizado pela Faculdade Donaduzzi. O objetivo é apresentar a perícia digital a alunos do ensino médio e mostrar que a faculdade oferece cursos que levam a essa área, como **Engenharia de Software** e quem tiver interesse direto em perícia também pode fazer parte da **LIAF** (Liga Interdisciplinar de Análises Forenses).
+
+## A demonstração no dia do evento
+
+O dashboard será rodado localmente e simula uma bancada de perícia digital:
+
+- o **celular ao vivo**, espelhado na tela e controlado pelo computador;
+- a **imagem extraída**, com seus metadados: modelo do aparelho, data, localização (GPS) e hash;
+- a **linha do tempo de localização** do celular, desenhada num mapa;
+- um **terminal** onde o apresentador digita os comandos da análise.
+
+Os alunos também participam. Lendo um QR code, eles abrem uma página publicada num microserviço separado e enviam uma foto do próprio celular. A foto fica guardada na nuvem até o dashboard baixá-la, e o apresentador mostra ao vivo tudo o que aquela imagem revela.
 
 ## Como funciona
 
-- **Flask (notebook)** serve o dashboard e uma API JSON, só para o próprio notebook (`127.0.0.1`).
+- **Flask (local)** serve o dashboard e uma API JSON, só para a própria máquina (`127.0.0.1`).
 - **ADB** lê o celular conectado por USB e copia as fotos da câmera.
 - **Pillow** (com `pillow-heif`) extrai EXIF e GPS e gera prévias. A foto original nunca é alterada.
 - **Leaflet + OpenStreetMap** desenham a linha do tempo lida de `dashboard/data/timeline.json`.
@@ -21,7 +32,7 @@ Sistema da estação de perícia digital do projeto Perito Orienta 2026. Quase t
 
 ## Instalação
 
-O repositório tem duas pastas independentes: `dashboard/` (o sistema do notebook) e `upload_service/` (o microserviço de envio de fotos). Um único `.venv` na raiz serve para desenvolver os dois.
+O repositório tem duas pastas independentes: `dashboard/` (o sistema rodado localmente) e `upload_service/` (o microserviço de envio de fotos). Um único `.venv` na raiz serve para desenvolver os dois.
 
 ```powershell
 python -m venv .venv
@@ -52,7 +63,7 @@ cd dashboard
 python run.py
 ```
 
-Acesse `http://localhost:5000`. O dashboard não tem login porque só aceita conexões do próprio notebook: outros aparelhos da rede não conseguem abrir.
+Acesse `http://localhost:5000`. O dashboard não tem login porque só aceita conexões da própria máquina: outros aparelhos da rede não conseguem abrir.
 
 A linha do tempo é lida só quando o servidor inicia. Se trocar o `dashboard/data/timeline.json`, reinicie o servidor.
 
@@ -87,8 +98,8 @@ Preencha o `upload_service/.env`:
 | Variável | O que é |
 |---|---|
 | `CAMERA_TOKEN` | token do QR code: `python -c "import secrets; print(secrets.token_urlsafe(16))"` |
-| `SUPABASE_URL` | mesmo valor do notebook |
-| `SUPABASE_SECRET_KEY` | mesmo valor do notebook |
+| `SUPABASE_URL` | mesmo valor do `dashboard/.env` |
+| `SUPABASE_SECRET_KEY` | mesmo valor do `dashboard/.env` |
 | `SUPABASE_BUCKET` | padrão `uploads` |
 
 A página fica em `http://localhost:5100/camera?token=SEU_CAMERA_TOKEN`.
@@ -141,7 +152,7 @@ Toda a pasta `dashboard/data/` fica fora do git, porque guarda fotos e históric
 
 ## Metadados das fotos
 
-- A foto enviada é guardada e baixada byte a byte, sem nenhuma alteração. O SHA-256 no notebook é o mesmo do arquivo que saiu do celular. As prévias são cópias separadas.
+- A foto enviada é guardada e baixada byte a byte, sem nenhuma alteração. O SHA-256 no dashboard é o mesmo do arquivo que saiu do celular. As prévias são cópias separadas.
 - Pelo navegador, o sistema do celular pode remover metadados antes do envio. No iPhone, dependendo de como a foto é escolhida, somem fabricante, modelo, data e GPS.
 - As fotos HDR do iPhone chegam como JPEG com imagem extra embutida (o Pillow chama esse formato de `MPO`). Elas são aceitas e trazem os metadados completos.
 - O original completo, com GPS, sempre vem pelo ADB (`photos`, `pull` e `open`).
@@ -160,7 +171,7 @@ Os testes usam pastas temporárias, um ADB falso e um Supabase falso, então nã
 ## Estrutura
 
 ```
-dashboard/                dashboard do notebook
+dashboard/                dashboard rodado localmente
 ├── app/
 │   ├── __init__.py       create_app: configuração, pastas de dados, timeline, nuvem e rotas
 │   ├── config.py         lê o dashboard/.env

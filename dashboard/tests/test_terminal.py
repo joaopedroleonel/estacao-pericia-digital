@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from app.services.adb import AdbError
@@ -231,6 +233,7 @@ def test_sync_failure_still_lists_local_photos(app, run, uploaded_photo):
 
 
 def test_latest_opens_photo_downloaded_from_cloud(app, run, uploaded_photo, tmp_path, photo_factory):
+    os.utime(uploaded_photo, (0, 0))
     photo = photo_factory(tmp_path / "cloud.jpg").read_bytes()
     app.extensions["cloud"] = FakeCloud({"upload_20260929_110000_bbbb.jpg": photo})
     result = run("latest")
